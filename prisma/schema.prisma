@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Article {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  description String
+  excerpt     String
+  content     String
+  category    String
+  publishedAt DateTime
+  authorId    String?
+  author      User?    @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  roleId    String
+  role      Role      @relation(fields: [roleId], references: [id])
+  articles  Article[]   // 👈 RELACIÓN INVERSA
+  createdAt DateTime  @default(now())
+}
+
+model Role {
+  id    String @id @default(uuid())
+  name  String @unique // admin, editor, user
+  users User[]
+}
+
+model Disorder {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  description String
+  symptoms    Symptom[]
+}
+
+model Symptom {
+  id          String   @id @default(uuid())
+  text        String
+  disorderId  String
+  disorder    Disorder @relation(fields: [disorderId], references: [id])
+}
+
+model Resource {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  description String
+  content     String
+  type        String // help | wellbeing | habit | porn
+}
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  title     String
+  excerpt   String
+  content   String
+  author    String
+  role      String
+  createdAt DateTime @default(now())
+}
