@@ -6,3 +6,4 @@ from app.models.disorder import Disorder
 from app.models.symptom import Symptom
 from app.models.resource import Resource
 from app.models.testimonial import Testimonial
+from app.models.diarie import Diarie

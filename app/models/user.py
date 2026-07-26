@@ -17,3 +17,6 @@ class User(Base):
     # Relaciones
     role = relationship("Role", back_populates="users")
     articles = relationship("Article", back_populates="author")
+    testimonials = relationship("Testimonial", back_populates="author")
+    # Corregido: plural y apuntando al back_populates correcto en Diarie
+    diaries = relationship("Diarie", back_populates="user", cascade="all, delete-orphan")

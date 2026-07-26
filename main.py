@@ -6,8 +6,8 @@ from app.database import engine, Base
 # Importamos los modelos para que SQLAlchemy sepa qué tablas crear
 import app.models  
 # Importamos los routers
-from app.api import articles, disorders, auth
-
+from app.api import articles, disorders, auth,testimonials,diarie
+ 
 # Crear las tablas en Postgres si no existen
 # Nota: Esto es ideal para desarrollo rápido. En producción usarías migraciones (Alembic).
 Base.metadata.create_all(bind=engine)
@@ -21,7 +21,7 @@ app = FastAPI(
 # Configuración de CORS (equivalente a tu cors() en Express)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Modifica en producción con tus dominios reales
+    allow_origins=["*"], # Tu puerto de React / Vite
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,7 +32,17 @@ app.add_middleware(
 def health_check():
     return {"status": "ok", "service": "mental-health-api"}
 
-# Montar los routers con sus respectivos prefijos (el app.use(...) de Express)
+
 app.include_router(articles.router, prefix="/api/articles", tags=["Articles"])
+
 app.include_router(disorders.router, prefix="/api/disorders", tags=["Disorders"])
+
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+
+app.include_router(testimonials.router, prefix="/api/testimonials", tags=["Testimonials"])
+
+app.include_router(diarie.router, prefix="/api/diaries", tags=["Diarie"])
+
+
+
+ 

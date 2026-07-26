@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime,timezone
 from sqlalchemy import Column, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -16,7 +16,7 @@ class Article(Base):
     category = Column(String, nullable=False)
     published_at = Column(DateTime, nullable=False)
     author_id = Column(String, ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    
     # Relaciones
     author = relationship("User", back_populates="articles")

@@ -14,7 +14,7 @@ from app.services.email_service import send_reset_email
 # Nota: En producción, extrae esto a variables de entorno (p. ej., usando python-dotenv o Pydantic Settings)
 router = APIRouter(prefix="", tags=["authentication"])
 
-SECRET_KEY = "tu_super_clave_secreta_para_salud_mental"
+SECRET_KEY = "abc123_mi_clave_secreta"
 ALGORITHM = "HS256"
 RESET_PASSWORD_TOKEN_EXPIRE_MINUTES = 15
 ACCESS_TOKEN_EXPIRE_HOURS = 24
@@ -35,6 +35,7 @@ class ResetPasswordRequest(BaseModel):
 
 # 3. Funciones Auxiliares para Generación y Validación de Tokens
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)):
+
     """Genera el token de sesión tradicional para el usuario."""
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta
@@ -99,7 +100,7 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
         )
     
     # Generamos el token de acceso guardando el ID del usuario y su rol
-    token = create_access_token(data={"sub": user.id, "role": user.role_id})
+    token = create_access_token(data={"sub": user.id,"role": user.role_id,"type": "access"})
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -169,3 +170,51 @@ async def reset_password(request: ResetPasswordRequest, db: Session = Depends(ge
     UserService.update_password(db, user=user, new_password=request.new_password)
 
     return {"message": "Tu contraseña ha sido restablecida con éxito."}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from fastapi.security import OAuth2PasswordRequestForm
+
+
+@router.post("/token")
+def login_swagger(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    user = UserService.get_by_email(
+        db,
+        email=form_data.username
+    )
+
+    if not user or not UserService.verify_password(
+        form_data.password,
+        user.password
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Correo o contraseña incorrectos."
+        )
+
+    token = create_access_token(
+        data={
+            "sub": user.id,
+            "role": user.role_id,
+            "type": "access"
+        }
+    )
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }

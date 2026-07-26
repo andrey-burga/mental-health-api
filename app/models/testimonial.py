@@ -1,6 +1,7 @@
 import uuid
-from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Text
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, DateTime, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 class Testimonial(Base):
@@ -11,6 +12,11 @@ class Testimonial(Base):
     title = Column(String, nullable=False)
     excerpt = Column(Text, nullable=False)
     content = Column(Text, nullable=False)
-    author = Column(String, nullable=False)
-    role = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Clave foránea que conecta con la tabla de usuarios
+    author_id = Column(String, ForeignKey("users.id"), nullable=False)
+    
+    # Relación para acceder a los datos del usuario directamente
+    author = relationship("User", back_populates="testimonials")
+    
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

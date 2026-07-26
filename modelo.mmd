@@ -1,0 +1,79 @@
+erDiagram
+
+    ROLES {
+        string id PK
+        string name UK
+    }
+
+    USERS {
+        string id PK
+        string email UK
+        string password
+        string name
+        string role_id FK
+        datetime created_at
+    }
+
+    ARTICLES {
+        string id PK
+        string slug UK
+        string title
+        string description
+        text excerpt
+        text content
+        string category
+        datetime published_at
+        string author_id FK
+        datetime created_at
+    }
+
+    TESTIMONIALS {
+        string id PK
+        string slug UK
+        string title
+        text excerpt
+        text content
+        string author_id FK
+        datetime created_at
+    }
+
+    DISORDERS {
+        string id PK
+        string slug UK
+        string title
+        string description
+    }
+
+    SYMPTOMS {
+        string id PK
+        string text
+        string disorder_id FK
+    }
+
+    RESOURCES {
+        string id PK
+        string slug UK
+        string title
+        string description
+        text content
+        string type
+    }
+
+    JOURNAL_ENTRIES {
+        string id PK
+        string user_id FK
+        string mood
+        text text
+        string tag
+        datetime created_at
+    }
+
+    %% Relaciones
+
+    ROLES ||--o{ USERS : has
+
+    USERS ||--o{ ARTICLES : writes
+    USERS ||--o{ TESTIMONIALS : writes
+    USERS ||--o{ JOURNAL_ENTRIES : creates
+
+    DISORDERS ||--o{ SYMPTOMS : contains
