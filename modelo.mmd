@@ -68,6 +68,15 @@ erDiagram
         datetime created_at
     }
 
+    DAILY_REFLECTIONS {
+        string id PK
+        text phrase
+        string author
+        date show_date UK "Opcional: Para programar frases por día"
+        boolean active
+        datetime created_at
+    }
+
     %% Relaciones
 
     ROLES ||--o{ USERS : has
