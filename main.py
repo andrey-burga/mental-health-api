@@ -47,7 +47,7 @@ app.include_router(reflections.router, prefix="/api/reflections", tags=["Daily R
 
 app.include_router(sessions.router, prefix="/api/sessions", tags=["Sessions"])
 
-app.include_router(sessions.router, prefix="/api/habits", tags=["Habits"])
+app.include_router(habit.router, prefix="/api/habits", tags=["Habits"])
 
 
 
