@@ -10,19 +10,30 @@ erDiagram
         string email UK
         string password
         string name
+        string preferred_name
+        string emergency_contact
         string role_id FK
         datetime created_at
+    }
+
+    USER_WELLNESS_PROFILES {
+        string id PK
+        string user_id FK
+        decimal sleep_hours
+        text emotional_goal
+        text coping_strategy
+        datetime updated_at
     }
 
     SESSIONS {
         string id PK
         string user_id FK
-        string refresh_token_hash UK "Hash del token para validar la sesión"
-        string device_name "Ej: Samsung Galaxy S25 / Chrome on Windows"
-        string ip_address "Ej: 181.xxx.xxx.xxx"
-        string location "Ej: Medellín, Colombia"
-        datetime last_active_at "Última vez que hizo una petición"
-        datetime expires_at "Fecha límite de validez de la sesión"
+        string refresh_token_hash UK
+        string device_name
+        string ip_address
+        string location
+        datetime last_active_at
+        datetime expires_at
         datetime created_at
     }
 
@@ -80,11 +91,20 @@ erDiagram
         datetime created_at
     }
 
+    HABITS {
+        string id PK
+        string user_id FK
+        string text
+        boolean completed
+        string category
+        datetime created_at
+    }
+
     DAILY_REFLECTIONS {
         string id PK
         text phrase
         string author
-        date show_date UK "Opcional: Para programar frases por día"
+        date show_date UK
         boolean active
         datetime created_at
     }
@@ -92,8 +112,12 @@ erDiagram
     %% Relaciones
 
     ROLES ||--o{ USERS : has
+
     USERS ||--o{ SESSIONS : has_active
+    USERS ||--|| USER_WELLNESS_PROFILES : has_wellness
     USERS ||--o{ ARTICLES : writes
     USERS ||--o{ TESTIMONIALS : writes
     USERS ||--o{ JOURNAL_ENTRIES : creates
+    USERS ||--o{ HABITS : manages
+
     DISORDERS ||--o{ SYMPTOMS : contains

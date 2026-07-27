@@ -21,3 +21,4 @@ class User(Base):
     # Corregido: plural y apuntando al back_populates correcto en Diarie
     diaries = relationship("Diarie", back_populates="user", cascade="all, delete-orphan")
     sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
+    habits = relationship("Habit", back_populates="user", cascade="all, delete-orphan")
