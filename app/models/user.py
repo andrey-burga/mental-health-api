@@ -20,3 +20,4 @@ class User(Base):
     testimonials = relationship("Testimonial", back_populates="author")
     # Corregido: plural y apuntando al back_populates correcto en Diarie
     diaries = relationship("Diarie", back_populates="user", cascade="all, delete-orphan")
+    sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")

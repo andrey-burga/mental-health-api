@@ -6,7 +6,7 @@ from app.database import engine, Base
 # Importamos los modelos para que SQLAlchemy sepa qué tablas crear
 import app.models  
 # Importamos los routers
-from app.api import articles, disorders, auth,testimonials,diarie,reflections
+from app.api import articles, disorders, auth,testimonials,diarie,reflections,sessions
  
 # Crear las tablas en Postgres si no existen
 # Nota: Esto es ideal para desarrollo rápido. En producción usarías migraciones (Alembic).
@@ -44,6 +44,8 @@ app.include_router(testimonials.router, prefix="/api/testimonials", tags=["Testi
 app.include_router(diarie.router, prefix="/api/diaries", tags=["Diarie"])
 
 app.include_router(reflections.router, prefix="/api/reflections", tags=["Daily Reflections"])
+
+app.include_router(sessions.router, prefix="/api/sessions", tags=["Sessions"])
 
 
 

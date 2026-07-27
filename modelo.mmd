@@ -14,6 +14,18 @@ erDiagram
         datetime created_at
     }
 
+    SESSIONS {
+        string id PK
+        string user_id FK
+        string refresh_token_hash UK "Hash del token para validar la sesión"
+        string device_name "Ej: Samsung Galaxy S25 / Chrome on Windows"
+        string ip_address "Ej: 181.xxx.xxx.xxx"
+        string location "Ej: Medellín, Colombia"
+        datetime last_active_at "Última vez que hizo una petición"
+        datetime expires_at "Fecha límite de validez de la sesión"
+        datetime created_at
+    }
+
     ARTICLES {
         string id PK
         string slug UK
@@ -80,9 +92,8 @@ erDiagram
     %% Relaciones
 
     ROLES ||--o{ USERS : has
-
+    USERS ||--o{ SESSIONS : has_active
     USERS ||--o{ ARTICLES : writes
     USERS ||--o{ TESTIMONIALS : writes
     USERS ||--o{ JOURNAL_ENTRIES : creates
-
     DISORDERS ||--o{ SYMPTOMS : contains
