@@ -18,7 +18,13 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 app.set('trust proxy', 1);
-app.use(helmet());
+
+function normalizeOrigin(value: string): string {
+  return value
+    .trim()
+    .replace(/^['"]|['"]$/g, '')
+    .replace(/\/+$/, '');
+}
 
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://mental-health-git-main-soyandrey20s-projects.vercel.app',
@@ -32,29 +38,47 @@ const DEFAULT_ALLOWED_ORIGINS = [
     : []),
 ];
 
-const allowedOrigins = new Set(
-  process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',')
-        .map((origin) => origin.trim())
-        .filter(Boolean)
-    : DEFAULT_ALLOWED_ORIGINS
-);
+const envAllowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+      .map(normalizeOrigin)
+      .filter(Boolean)
+  : [];
+
+const allowedOrigins = new Set<string>([
+  ...DEFAULT_ALLOWED_ORIGINS.map(normalizeOrigin),
+  ...envAllowedOrigins,
+]);
 
 class CorsForbiddenError extends Error {
   statusCode = 403;
 }
 
+const corsOptions: cors.CorsOptions = {
+  origin(origin, callback) {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    const normalized = normalizeOrigin(origin);
+    if (allowedOrigins.has(normalized)) {
+      callback(null, true);
+      return;
+    }
+    callback(new CorsForbiddenError('Origen no permitido por CORS'));
+  },
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['X-Total-Count'],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options('/{*splat}', cors(corsOptions));
+
 app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.has(origin)) {
-        callback(null, true);
-        return;
-      }
-      callback(new CorsForbiddenError('Origen no permitido por CORS'));
-    },
-    credentials: true,
-    exposedHeaders: ['X-Total-Count'],
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
 
@@ -66,6 +90,7 @@ const globalApiLimiter = rateLimit({
   limit: 120,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS',
   message: { detail: 'Demasiadas peticiones. Intenta nuevamente en un minuto.' },
 });
 
