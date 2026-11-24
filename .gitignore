@@ -83,10 +83,11 @@ Thumbs.db
 
 
 # =========================
-# Node (solo si tienes frontend o herramientas npm)
+# Node / TypeScript Build
 # =========================
 
 node_modules/
+dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

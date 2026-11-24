@@ -1,0 +1,5 @@
+{
+  "name": "Mental Health API",
+  "description": "API de soporte y divulgación sobre salud mental migrada a Node.js y Express.",
+  "requestFramePermissions": []
+}
