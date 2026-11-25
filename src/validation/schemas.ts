@@ -71,6 +71,16 @@ export const disorderCreateSchema = z.object({
   description: z.string().trim().min(5).max(2000),
 });
 
+export const disorderUpdateSchema = disorderCreateSchema
+  .partial()
+  .refine(
+    (data) =>
+      data.slug !== undefined ||
+      data.title !== undefined ||
+      data.description !== undefined,
+    { message: 'Debes enviar al menos un campo para actualizar' }
+  );
+
 export const symptomCreateSchema = z.object({
   text: z.string().trim().min(2).max(500),
   disorder_id: z.string().trim().min(1).max(100),
@@ -91,6 +101,19 @@ export const testimonialCreateSchema = z.object({
 export const testimonialUpdateSchema = testimonialCreateSchema.partial().extend({
   status: z.enum(['pending', 'approved', 'rejected']).optional(),
 });
+
+export const testimonialStatusSchema = z.object({
+  status: z.enum(['pending', 'approved', 'rejected']),
+});
+
+export const userRoleUpdateSchema = z
+  .object({
+    role: z.string().trim().min(1).max(64).optional(),
+    role_id: z.string().trim().min(1).max(64).optional(),
+  })
+  .refine((data) => Boolean(data.role || data.role_id), {
+    message: 'Debes indicar role o role_id',
+  });
 
 export const diarieCreateSchema = z.object({
   mood: z.string().trim().min(1).max(50),

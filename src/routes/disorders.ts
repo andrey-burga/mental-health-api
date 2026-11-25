@@ -7,6 +7,7 @@ import { authenticateUser, requireRole } from '../middleware/auth.js';
 import type { Symptom } from '../types.js';
 import {
   disorderCreateSchema,
+  disorderUpdateSchema,
   symptomCreateSchema,
   validateBody,
 } from '../validation/schemas.js';
@@ -142,6 +143,97 @@ disordersRouter.post(
         .returning();
 
       res.status(201).json(created);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+disordersRouter.patch(
+  '/:disorder_id',
+  authenticateUser,
+  requireRole('admin'),
+  validateBody(disorderUpdateSchema),
+  async (req, res, next) => {
+    try {
+      const disorderId = String(req.params.disorder_id);
+      const existingRows = await db
+        .select()
+        .from(disorders)
+        .where(eq(disorders.id, disorderId))
+        .limit(1);
+
+      const existing = existingRows[0];
+      if (!existing) {
+        res.status(404).json({ detail: 'Trastorno no encontrado' });
+        return;
+      }
+
+      const { slug, title, description } = req.body as {
+        slug?: string;
+        title?: string;
+        description?: string;
+      };
+
+      if (slug && slug !== existing.slug) {
+        const slugOwner = await db
+          .select({ id: disorders.id })
+          .from(disorders)
+          .where(eq(disorders.slug, slug))
+          .limit(1);
+
+        if (slugOwner[0]) {
+          res.status(400).json({
+            detail: 'El nuevo slug ya está en uso por otro trastorno',
+          });
+          return;
+        }
+      }
+
+      const patchPayload: Partial<typeof disorders.$inferInsert> = {};
+      if (slug !== undefined) patchPayload.slug = slug;
+      if (title !== undefined) patchPayload.title = title;
+      if (description !== undefined) patchPayload.description = description;
+
+      const [updated] = await db
+        .update(disorders)
+        .set(patchPayload)
+        .where(eq(disorders.id, disorderId))
+        .returning();
+
+      const relatedSymptoms = await db
+        .select()
+        .from(symptoms)
+        .where(eq(symptoms.disorder_id, disorderId));
+
+      res.json({
+        ...updated,
+        symptoms: relatedSymptoms,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+disordersRouter.delete(
+  '/:disorder_id',
+  authenticateUser,
+  requireRole('admin'),
+  async (req, res, next) => {
+    try {
+      const disorderId = String(req.params.disorder_id);
+      const deleted = await db
+        .delete(disorders)
+        .where(eq(disorders.id, disorderId))
+        .returning({ id: disorders.id });
+
+      if (!deleted[0]) {
+        res.status(404).json({ detail: 'Trastorno no encontrado' });
+        return;
+      }
+
+      res.status(204).send();
     } catch (err) {
       next(err);
     }

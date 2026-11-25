@@ -13,6 +13,7 @@ import { habitsRouter } from './src/routes/habits.js';
 import { reflectionsRouter } from './src/routes/reflections.js';
 import { sessionsRouter } from './src/routes/sessions.js';
 import { testimonialsRouter } from './src/routes/testimonials.js';
+import { usersRouter } from './src/routes/users.js';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -112,6 +113,7 @@ app.get('/', (_req, res) => {
       '/api/reflections',
       '/api/sessions',
       '/api/habits',
+      '/api/users',
     ],
   });
 });
@@ -142,6 +144,7 @@ app.use('/api/diaries', diariesRouter);
 app.use('/api/reflections', reflectionsRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/habits', habitsRouter);
+app.use('/api/users', usersRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ detail: 'Ruta no encontrada' });

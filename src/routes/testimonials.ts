@@ -8,11 +8,13 @@ import {
   authenticateUser,
   isAdminOrAuthor,
   optionalAuthenticateUser,
+  requireRole,
 } from '../middleware/auth.js';
 import type { TestimonialStatus } from '../types.js';
 import {
   parsePagination,
   testimonialCreateSchema,
+  testimonialStatusSchema,
   testimonialUpdateSchema,
   validateBody,
 } from '../validation/schemas.js';
@@ -309,6 +311,43 @@ testimonialsRouter.patch(
   authenticateUser,
   validateBody(testimonialUpdateSchema),
   handleUpdateTestimonial
+);
+
+testimonialsRouter.patch(
+  '/:testimonial_id/status',
+  authenticateUser,
+  requireRole('admin'),
+  validateBody(testimonialStatusSchema),
+  async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const id = String(req.params.testimonial_id);
+      const { status } = req.body as { status: TestimonialStatus };
+
+      const existingRows = await db
+        .select({ id: testimonials.id })
+        .from(testimonials)
+        .where(eq(testimonials.id, id))
+        .limit(1);
+
+      if (!existingRows[0]) {
+        res.status(404).json({ detail: 'Testimonio no encontrado' });
+        return;
+      }
+
+      await db
+        .update(testimonials)
+        .set({ status })
+        .where(eq(testimonials.id, id));
+
+      const [updated] = await selectTestimonialWithAuthor()
+        .where(eq(testimonials.id, id))
+        .limit(1);
+
+      res.json(formatJoinedTestimonial(updated));
+    } catch (err) {
+      next(err);
+    }
+  }
 );
 
 testimonialsRouter.delete(
